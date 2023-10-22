@@ -170,6 +170,12 @@ def set_dpi_xy(self, dpi_x, dpi_y):
         if dpi_x not in self.AVAILABLE_DPI:
             raise RuntimeError("Provided DPI " + str(dpi_x) + " is not in available_dpi values: " + str(self.AVAILABLE_DPI))
 
+    # check that DPI is not more than the maximum
+    if dpi_x > self.DPI_MAX:
+        raise RuntimeError("Provided DPI " + str(dpi_x) + " is larger than maximum of " + str(self.DPI_MAX))
+    if dpi_y > self.DPI_MAX:
+        raise RuntimeError("Provided DPI " + str(dpi_x) + " is larger than maximum of " + str(self.DPI_MAX))
+
     driver_path = self.get_driver_path('dpi')
 
     if self._testing:
@@ -186,18 +192,12 @@ def set_dpi_xy(self, dpi_x, dpi_y):
     else:
         dpi_bytes = struct.pack('>HH', dpi_x, dpi_y)
 
+    # store to local variable (TODO: can we replace this by getting from persistence?)
     self.dpi[0] = dpi_x
     self.dpi[1] = dpi_y
 
     self.set_persistence(None, "dpi_x", dpi_x)
     self.set_persistence(None, "dpi_y", dpi_y)
-
-    # constrain DPI to maximum
-    if hasattr(self, 'DPI_MAX'):
-        if self.dpi[0] > self.DPI_MAX:
-            self.dpi[0] = self.DPI_MAX
-        if self.dpi[1] > self.DPI_MAX:
-            self.dpi[1] = self.DPI_MAX
 
     with open(driver_path, 'wb') as driver_file:
         driver_file.write(dpi_bytes)
@@ -285,11 +285,7 @@ def get_dpi_stages(self):
 def max_dpi(self):
     self.logger.debug("DBus call max_dpi")
 
-    if hasattr(self, 'DPI_MAX'):
-        return self.DPI_MAX
-
-    else:
-        return 500
+    return self.DPI_MAX
 
 
 @endpoint('razer.device.dpi', 'availableDPI', out_sig='ai')
@@ -348,3 +344,54 @@ def get_supported_poll_rates(self):
     self.logger.debug("DBus call get_supported_poll_rates")
 
     return self.POLL_RATES
+
+
+@endpoint('razer.device.misc', 'setHyperPollingLED', in_sig='y')
+def set_hyperpolling_wireless_dongle_indicator_led_mode(self, mode):
+    """
+    Set the function of the LED on the dongle, takes in 1 char
+    1 = Connection Status (green if connected to mouse)
+    2 = Battery Status (green if high battery, yellow if medium battery, red if low battery)
+    3 = Battery Warning (red if low battery, off otherwise)
+
+    :param mode: LED mode
+    :type mode: char
+    """
+    self.logger.debug("DBus call set_hyperpolling_wireless_dongle_indicator_led_mode")
+
+    driver_path = self.get_driver_path('hyperpolling_wireless_dongle_indicator_led_mode')
+
+    with open(driver_path, 'w') as driver_file:
+        driver_file.write(str(mode))
+
+
+@endpoint('razer.device.misc', 'setHyperPollingPair', in_sig='s')
+def set_hyperpolling_wireless_dongle_pair(self, pid):
+    """
+    Set Pairing mode, takes in 1 string which is the PID
+
+    :param pid: product id
+    :type pid: char
+    """
+    self.logger.debug("DBus call set_hyperpolling_wireless_dongle_pair")
+
+    driver_path = self.get_driver_path('hyperpolling_wireless_dongle_pair')
+
+    with open(driver_path, 'w') as driver_file:
+        driver_file.write(pid)
+
+
+@endpoint('razer.device.misc', 'setHyperPollingUnpair', in_sig='s')
+def set_hyperpolling_wireless_dongle_unpair(self, pid):
+    """
+    Set Unpairing mode, takes in 1 string which is the PID
+
+    :param pid: product id
+    :type pid: char
+    """
+    self.logger.debug("DBus call set_hyperpolling_wireless_dongle_unpair")
+
+    driver_path = self.get_driver_path('hyperpolling_wireless_dongle_unpair')
+
+    with open(driver_path, 'w') as driver_file:
+        driver_file.write(pid)
