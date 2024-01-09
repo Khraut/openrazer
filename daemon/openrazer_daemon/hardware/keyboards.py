@@ -1449,9 +1449,11 @@ class RazerBook2020(_MacroKeyboard):
     HAS_MATRIX = True
     MATRIX_DIMS = [6, 16]
     METHODS = ['get_device_type_keyboard', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
-               'set_reactive_effect', 'set_none_effect', 'set_custom_effect', 'set_key_row',
+               'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect',
+               'set_breath_dual_effect', 'set_custom_effect', 'set_key_row',
+               'set_starlight_random_effect', 'set_starlight_single_effect', 'set_starlight_dual_effect',
                'set_ripple_effect', 'set_ripple_effect_random_colour']
-
+               
     DEVICE_IMAGE = "https://assets.razerzone.com/eeimages/support/products/1743/razerbook132020.png"
 
 
